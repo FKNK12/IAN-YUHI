@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard | IAN YUHI</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-logo">
+                <a href="index.html"><i class="fas fa-clock"></i> IAN YUHI</a>
+            </div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="shop.html">Shop All</a></li>
+                <li><a href="checkout.html">Checkout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="page-back-link">
+        <a href="admin.html"><i class="fas fa-arrow-left"></i> Back to Admin Login</a>
+    </div>
+
+    <main class="page-shell admin-page">
+        <div class="container">
+            <div class="admin-card">
+                <div class="admin-header">
+                    <div>
+                        <p class="eyebrow">Admin Dashboard</p>
+                        <h1>Admin Control Center</h1>
+                        <p>Use the links below to manage products, view the catalog, and manage user access.</p>
+                    </div>
+                    <div class="admin-header-actions">
+                        <button id="adminLogoutBtn" class="btn-secondary" type="button">Logout</button>
+                    </div>
+                </div>
+
+                <div id="adminDashboardContent"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

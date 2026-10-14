@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Setup | IAN YUHI</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container">
+        <div class="nav-logo">
+          <a href="index.html"><i class="fas fa-clock"></i> IAN YUHI</a>
+        </div>
+        <ul class="nav-links" id="navLinks">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="shop.html">Shop All</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <main class="page-shell admin-page">
+      <div class="container">
+        <div class="admin-card">
+          <div class="admin-header">
+            <div>
+              <p class="eyebrow">Administrator Setup</p>
+              <h1>First Admin Account</h1>
+              <p>
+                Create the first administrator account for the store. After the first admin is created,
+                this setup page will be hidden and the normal admin login page will be used.
+              </p>
+            </div>
+          </div>
+
+          <section class="admin-section">
+            <h2>Create Admin Account</h2>
+            <div class="admin-form-and-actions">
+              <form id="adminSetupForm" class="admin-form">
+                <label>
+                  Full Name
+                  <input type="text" id="setupAdminName" placeholder="Admin name" required />
+                </label>
+                <label>
+                  Email Address
+                  <input type="email" id="setupAdminEmail" placeholder="admin@example.com" required />
+                </label>
+                <label>
+                  Admin PIN
+                  <input type="password" id="setupAdminPassword" placeholder="Enter admin PIN" required />
+                </label>
+                <button type="submit" class="btn-secondary">Create Admin Account</button>
+              </form>
+              <div class="admin-form-actions">
+                <button type="button" id="adminSetupGoLogin" class="btn-secondary" onclick="window.location.href='admin.html'">Login as Admin</button>
+              </div>
+            </div>
+            <p id="adminSetupMessage" class="details"></p>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

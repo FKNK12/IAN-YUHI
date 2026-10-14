@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Admin | IAN YUHI</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-logo">
+                <a href="index.html"><i class="fas fa-clock"></i> IAN YUHI</a>
+            </div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="shop.html">Shop All</a></li>
+                <li><a href="checkout.html">Checkout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="page-back-link">
+        <a href="admin.html"><i class="fas fa-arrow-left"></i> Back to Admin Login</a>
+    </div>
+
+    <main class="page-shell admin-page">
+        <div class="container">
+            <div class="admin-card">
+                <div class="admin-header">
+                    <div>
+                        <p class="eyebrow">Create Admin Account</p>
+                        <h1>Create a new administrator</h1>
+                        <p>Enter the admin PIN to create a new admin account. If no admin exists yet, this will become the first admin.</p>
+                    </div>
+                </div>
+
+                <section class="admin-section">
+                    <form id="adminCreateForm" class="admin-form">
+                        <label>
+                            Full Name
+                            <input type="text" id="adminCreateName" placeholder="Admin name" required />
+                        </label>
+                        <label>
+                            Email Address
+                            <input type="email" id="adminCreateEmail" placeholder="admin@example.com" required />
+                        </label>
+                        <label>
+                            Admin PIN
+                            <input type="password" id="adminCreatePin" placeholder="Enter admin PIN" required />
+                        </label>
+                        <button type="submit" class="btn-primary">Create Admin Account</button>
+                        <p id="adminCreateMessage" class="details"></p>
+                    </form>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

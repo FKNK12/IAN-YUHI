@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Integrations | IAN YUHI</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <div class="nav-logo">
+        <a href="index.html"><i class="fas fa-clock"></i> IAN YUHI</a>
+      </div>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop All</a></li>
+        <li><a href="admin-dashboard.html">Dashboard</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="page-back-link">
+    <a href="admin-dashboard.html"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+  </div>
+
+  <main class="page-shell admin-page">
+    <div class="container">
+      <div class="admin-card">
+        <div class="admin-header">
+          <div>
+            <p class="eyebrow">Integrations</p>
+            <h1>Connect External Apps</h1>
+            <p>Link your website to payment software, banks, accounting tools, and other business systems.</p>
+          </div>
+        </div>
+
+        <section class="admin-section">
+          <form id="integrationForm" class="admin-form">
+            <div class="form-grid">
+              <label>
+                Integration Name
+                <input type="text" id="integrationName" placeholder="Stripe, Bank, QuickBooks..." required />
+              </label>
+              <label>
+                Type
+                <select id="integrationType" required>
+                  <option value="Payment Gateway">Payment Gateway</option>
+                  <option value="Bank">Bank</option>
+                  <option value="Accounting">Accounting</option>
+                  <option value="CRM">CRM</option>
+                  <option value="ERP">ERP</option>
+                  <option value="Shipping">Shipping</option>
+                  <option value="Other">Other</option>
+                </select>
+              </label>
+              <label>
+                Provider / App
+                <select id="integrationProvider" required>
+                  <option value="Stripe">Stripe</option>
+                  <option value="PayPal">PayPal</option>
+                  <option value="Square">Square</option>
+                  <option value="Bank">Bank</option>
+                  <option value="QuickBooks">QuickBooks</option>
+                  <option value="Xero">Xero</option>
+                  <option value="Shopify">Shopify</option>
+                  <option value="Custom App">Custom App</option>
+                </select>
+              </label>
+              <label>
+                Environment
+                <select id="integrationEnvironment">
+                  <option value="Sandbox">Sandbox</option>
+                  <option value="Production">Production</option>
+                </select>
+              </label>
+              <label>
+                Client ID / Account ID
+                <input type="text" id="integrationClientId" placeholder="Client ID or account ID" />
+              </label>
+              <label>
+                Secret Key / API Key
+                <input type="text" id="integrationApiKey" placeholder="Secret key, API key, or access token" />
+              </label>
+              <label class="full-span">
+                Webhook URL / Endpoint
+                <input type="url" id="integrationWebhook" placeholder="https://yourapp.com/webhook" />
+              </label>
+              <label class="full-span">
+                Bank / Account Details
+                <textarea id="integrationBankDetails" rows="3" placeholder="Bank name, account number, routing number, IBAN, or account notes..."></textarea>
+              </label>
+              <label class="full-span">
+                Notes
+                <textarea id="integrationNotes" rows="4" placeholder="Add any setup instructions, testing notes, or business requirements..."></textarea>
+              </label>
+            </div>
+            <div class="admin-form-actions">
+              <button type="button" id="testIntegrationBtn" class="btn-secondary">Test Connection</button>
+              <button type="submit" class="btn-primary">Save Connection</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="admin-section">
+          <div class="admin-header compact-header">
+            <div>
+              <h2>Connected Apps</h2>
+            </div>
+          </div>
+          <div id="integrationsList" class="approval-table"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const INTEGRATIONS_KEY = 'ian-yuhi-integrations';
+    const INTEGRATIONS_PIN = '05152007';
+    const INTEGRATIONS_APPROVED_ADMIN_KEY = 'ian-yuhi-approved-integrations-admins';
+
+    function getAdminUsers() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('ian-yuhi-admin-users') || '[]');
+        return Array.isArray(saved) ? saved : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function getCurrentAdmin() {
+      try {
+        return JSON.parse(localStorage.getItem('ian-yuhi-current-admin') || 'null');
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function getIntegrationAccessAdmins() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(INTEGRATIONS_APPROVED_ADMIN_KEY) || 'null');
+        if (Array.isArray(saved) && saved.length > 0) {
+          return saved.map(email => String(email || '').trim().toLowerCase()).filter(Boolean);
+        }
+      } catch (error) {
+        // fall through to the default initial list
+      }
+
+      const adminUsers = getAdminUsers().filter(user => user && user.permissions && user.permissions.admin);
+      const fixedAdmins = adminUsers.slice(0, 2).map(user => String(user.email || '').trim().toLowerCase()).filter(Boolean);
+      localStorage.setItem(INTEGRATIONS_APPROVED_ADMIN_KEY, JSON.stringify(fixedAdmins));
+      return fixedAdmins;
+    }
+
+    function authorizeIntegrationsAccess() {
+      const currentAdmin = getCurrentAdmin();
+      const allowedAdmins = getIntegrationAccessAdmins();
+
+      if (currentAdmin && currentAdmin.permissions && currentAdmin.permissions.admin) {
+        const email = String(currentAdmin.email || '').trim().toLowerCase();
+        if (allowedAdmins.includes(email)) {
+          return true;
+        }
+      }
+
+      const enteredEmail = prompt('Admin email for integrations access:');
+      if (!enteredEmail) {
+        window.location.href = 'admin-dashboard.html';
+        return false;
+      }
+
+      const enteredPin = prompt('Enter the integrations PIN:');
+      if (!enteredPin) {
+        window.location.href = 'admin-dashboard.html';
+        return false;
+      }
+
+      if (enteredPin !== INTEGRATIONS_PIN) {
+        alert('Invalid integrations PIN. Access denied.');
+        window.location.href = 'admin-dashboard.html';
+        return false;
+      }
+
+      const matchingAdmin = getAdminUsers().find(user => {
+        if (!user || !user.permissions || !user.permissions.admin) return false;
+        return String(user.email || '').trim().toLowerCase() === enteredEmail.trim().toLowerCase();
+      });
+
+      if (!matchingAdmin || !allowedAdmins.includes(String(matchingAdmin.email || '').trim().toLowerCase())) {
+        alert('Only the first two admin accounts can access this page.');
+        window.location.href = 'admin-dashboard.html';
+        return false;
+      }
+
+      localStorage.setItem('ian-yuhi-current-admin', JSON.stringify(matchingAdmin));
+      return true;
+    }
+
+    function getIntegrations() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(INTEGRATIONS_KEY) || '[]');
+        return Array.isArray(saved) ? saved : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveIntegrations(integrations) {
+      localStorage.setItem(INTEGRATIONS_KEY, JSON.stringify(integrations));
+    }
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function validateIntegrationForm() {
+      const name = document.getElementById('integrationName').value.trim();
+      const provider = document.getElementById('integrationProvider').value.trim();
+      const apiKey = document.getElementById('integrationApiKey').value.trim();
+      const clientId = document.getElementById('integrationClientId').value.trim();
+      const webhook = document.getElementById('integrationWebhook').value.trim();
+      const bankDetails = document.getElementById('integrationBankDetails').value.trim();
+
+      if (!name || !provider) {
+        return 'Please add the integration name and provider.';
+      }
+
+      const needsCredentials = provider === 'Stripe' || provider === 'PayPal' || provider === 'Square' || provider === 'QuickBooks' || provider === 'Xero' || provider === 'Shopify';
+      const needsBankDetails = provider === 'Bank';
+
+      if (needsCredentials && !apiKey && !clientId) {
+        return 'Add at least one credential such as the API key, secret key, or client ID.';
+      }
+
+      if (needsBankDetails && !bankDetails) {
+        return 'Add bank or account details before saving this integration.';
+      }
+
+      if (webhook && !/^https?:\/\//i.test(webhook)) {
+        return 'Webhook URL must start with http:// or https://';
+      }
+
+      return '';
+    }
+
+    function showIntegrationMessage(message, isSuccess = true) {
+      const box = document.createElement('div');
+      box.className = isSuccess ? 'status-pill approved' : 'status-pill denied';
+      box.style.marginTop = '12px';
+      box.style.display = 'inline-block';
+      box.textContent = message;
+
+      const existing = document.querySelector('.integration-message');
+      if (existing) existing.remove();
+
+      box.classList.add('integration-message');
+      const form = document.getElementById('integrationForm');
+      if (form) {
+        form.appendChild(box);
+      }
+    }
+
+    function renderIntegrations() {
+      const list = document.getElementById('integrationsList');
+      if (!list) return;
+
+      const integrations = getIntegrations();
+      if (!integrations.length) {
+        list.innerHTML = '<p class="empty-cart">No integrations connected yet.</p>';
+        return;
+      }
+
+      list.innerHTML = `
+        <div class="approval-row approval-header">
+          <span>Name</span>
+          <span>Type</span>
+          <span>Provider</span>
+          <span>Environment</span>
+          <span>Status</span>
+          <span>Webhook</span>
+          <span>Notes</span>
+          <span>Action</span>
+        </div>
+        ${integrations.map(integration => `
+          <div class="approval-row">
+            <span>${escapeHtml(integration.name)}</span>
+            <span>${escapeHtml(integration.type || 'Other')}</span>
+            <span>${escapeHtml(integration.provider || 'N/A')}</span>
+            <span>${escapeHtml(integration.environment || 'Sandbox')}</span>
+            <span><span class="status-pill ${integration.status === 'Connected' ? 'approved' : integration.status === 'Testing' ? 'waiting-review' : 'denied'}">${escapeHtml(integration.status || 'Inactive')}</span></span>
+            <span>${escapeHtml(integration.webhook || 'No webhook')}</span>
+            <span>${escapeHtml(integration.notes || 'No notes')}</span>
+            <span><button type="button" class="btn-danger btn-small" data-remove-id="${escapeHtml(integration.id)}">Remove</button></span>
+          </div>
+        `).join('')}
+      `;
+
+      list.querySelectorAll('[data-remove-id]').forEach(button => {
+        button.addEventListener('click', () => {
+          const id = button.getAttribute('data-remove-id');
+          const next = getIntegrations().filter(item => String(item.id) !== String(id));
+          saveIntegrations(next);
+          renderIntegrations();
+        });
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!authorizeIntegrationsAccess()) {
+        return;
+      }
+
+      renderIntegrations();
+
+      const form = document.getElementById('integrationForm');
+      if (!form) return;
+
+      const testButton = document.getElementById('testIntegrationBtn');
+      if (testButton) {
+        testButton.addEventListener('click', () => {
+          const error = validateIntegrationForm();
+          if (error) {
+            showIntegrationMessage(error, false);
+            return;
+          }
+
+          const provider = document.getElementById('integrationProvider').value;
+          const environment = document.getElementById('integrationEnvironment').value;
+          const message = `${provider} connection test passed in ${environment.toLowerCase()} mode.`;
+          showIntegrationMessage(message, true);
+        });
+      }
+
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const validationMessage = validateIntegrationForm();
+        if (validationMessage) {
+          showIntegrationMessage(validationMessage, false);
+          return;
+        }
+
+        const name = document.getElementById('integrationName').value.trim();
+        const type = document.getElementById('integrationType').value;
+        const provider = document.getElementById('integrationProvider').value.trim();
+        const environment = document.getElementById('integrationEnvironment').value;
+        const clientId = document.getElementById('integrationClientId').value.trim();
+        const apiKey = document.getElementById('integrationApiKey').value.trim();
+        const webhook = document.getElementById('integrationWebhook').value.trim();
+        const bankDetails = document.getElementById('integrationBankDetails').value.trim();
+        const notes = document.getElementById('integrationNotes').value.trim();
+
+        const integrations = getIntegrations();
+        const newConnection = {
+          id: Date.now().toString(),
+          name,
+          type,
+          provider,
+          environment,
+          status: 'Connected',
+          clientId,
+          apiKey,
+          webhook,
+          bankDetails,
+          notes,
+          createdAt: new Date().toISOString()
+        };
+
+        integrations.push(newConnection);
+        saveIntegrations(integrations);
+        renderIntegrations();
+        showIntegrationMessage('Integration saved successfully.', true);
+        form.reset();
+      });
+    });
+  </script>
+</body>
+</html>

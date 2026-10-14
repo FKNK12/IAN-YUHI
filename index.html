@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>IAN YUHI — Curated Men's Suits</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+</head>
+<body>
+
+<!-- ========== NAVIGATION ========== -->
+<nav class="navbar">
+    <div class="container">
+        <div class="nav-logo">
+            <a href="#"><i class="fas fa-clock"></i> IAN YUHI</a>
+        </div>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#home">Home</a></li>
+            <li><a href="shop.html">Shop All</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li><a href="#blog">Blog</a></li>
+            <li><button type="button" class="cart-btn" onclick="toggleCart()"><i class="fas fa-shopping-bag"></i> <span id="cartCount">0</span></button></li>
+        </ul>
+        <div class="hamburger" onclick="toggleMenu()">
+            <i class="fas fa-bars"></i>
+        </div>
+    </div>
+</nav>
+
+<!-- ========== HERO SECTION ========== -->
+<section class="hero" id="home">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="eyebrow">IAN YUHI</h1>
+                    <p class="hero-statement">Great suit isn’t just fabric and thread—it’s an instant shift in posture, presence, and confidence.</p>
+            <p>At IAN YUHI, we combine old-world tailoring with sleek modern cuts so you look effortless, feel incredible, and leave a lasting impression wherever you go.</p>
+            <a href="#shop" class="btn-primary">Browse Suits</a>
+        </div>
+    </div>
+</section>
+
+<!-- ========== SHOP ALL SECTION ========== -->
+<section class="shop" id="shop">
+    <div class="container">
+        <h2 class="section-title">Shop Now</h2>
+        <div class="filter-bar">
+            <input type="text" id="searchInput" placeholder="Search suits..." class="search-input" />
+            <select id="brandFilter" class="filter-select">
+                <option value="all">All Collections</option>
+                <option value="milan">Milan</option>
+                <option value="aster">Aster</option>
+                <option value="vesper">Vesper</option>
+                <option value="noir">Noir</option>
+                <option value="crown">Crown</option>
+                <option value="verona">Verona</option>
+                <option value="dorian">Dorian</option>
+                <option value="luxe">Luxe</option>
+            </select>
+        </div>
+        <div class="product-grid" id="productGrid"></div>
+    </div>
+</section>
+
+<!-- ========== COLLECTIONS SECTION ========== -->
+<section class="collections" id="collections">
+    <div class="container">
+        <h2 class="section-title">New</h2>
+        <div class="collection-grid">
+            <div class="collection-card" data-brand="milan">
+                <img src="image/suit.avif" alt="Milan Collection">
+                <h3>Milan</h3>
+                <p>Classic tailoring with a confident burgundy statement</p>
+                <a href="product.html?product=1" class="btn-secondary">View New</a>
+            </div>
+            <div class="collection-card" data-brand="aster">
+                <img src="image/suit 1.webp" alt="Aster Collection">
+                <h3>Aster</h3>
+                <p>Sharp pinstripes for polished evening occasions</p>
+                <a href="product.html?product=2" class="btn-secondary">View New</a>
+            </div>
+            <div class="collection-card" data-brand="vesper">
+                <img src="image/suit 2.webp" alt="Vesper Collection">
+                <h3>Vesper</h3>
+                <p>Refined checks and understated luxury</p>
+                <a href="product.html?product=3" class="btn-secondary">View New</a>
+            </div>
+            <div class="collection-card" data-brand="noir">
+                <img src="image/suit 3.jpg" alt="Noir Collection">
+                <h3>Noir</h3>
+                <p>Double-breasted elegance built for impact</p>
+                <a href="product.html?product=4" class="btn-secondary">View New</a>
+            </div>
+            <div class="collection-card" data-brand="crown">
+                <img src="image/suit 4.webp" alt="Crown Collection">
+                <h3>Crown</h3>
+                <p>Premium sandstone tones with a seamless finish</p>
+                <a href="product.html?product=5" class="btn-secondary">View New</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== ABOUT US ========== -->
+<section class="about" id="about">
+    <div class="container">
+        <div class="about-grid">
+            <div class="about-text">
+                <h2 class="section-title">About IAN YUHI</h2>
+                <p>IAN YUHI is a curated menswear destination for men who appreciate refined style, structure, and craftsmanship. We bring together premium tailoring that elevates every important moment.</p>
+                <p>From sharp business silhouettes to modern evening fits, we curate suits that balance heritage, quality, and confidence. Every piece in our collection is selected for precision, comfort, and lasting impact.</p>
+                <p>We're not just selling suits — we're helping every man dress with intention and presence.</p>
+                <div class="about-stats">
+                    <div><span>8+</span> Signature Looks</div>
+                    <div><span>100%</span> Tailored Picks</div>
+                    <div><span>24/7</span> Support</div>
+                </div>
+            </div>
+            <div class="about-image">
+                <img src="image/suit 2.webp" alt="Suit collection"/>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== BLOG PREVIEW ========== -->
+<section class="blog-preview" id="blog">
+    <div class="container">
+        <h2 class="section-title">Suit Styling & Care</h2>
+        <div class="blog-grid">
+            <div class="blog-card">
+                <img src="image/suit.avif" alt="Suit care"/>
+                <h3>How to Care for Your Suit</h3>
+                <p>Keep your tailored essentials sharp, crisp, and ready for every occasion...</p>
+                <a href="#">Read More →</a>
+            </div>
+            <div class="blog-card">
+                <img src="image/suit 3.jpg" alt="Suit styling"/>
+                <h3>Styling a Sharp Formal Look</h3>
+                <p>Build a wardrobe around fit, texture, and confident layering...</p>
+                <a href="#">Read More →</a>
+            </div>
+            <div class="blog-card">
+                <img src="image/suit 4.webp" alt="Suit trend"/>
+                <h3>Modern Suit Essentials</h3>
+                <p>Why clean structure and rich tones remain the signature of premium menswear...</p>
+                <a href="#">Read More →</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== CONTACT SECTION ========== -->
+<section class="contact" id="contact">
+    <div class="container">
+        <h2 class="section-title">Get In Touch</h2>
+        <div class="contact-grid">
+            <div class="contact-info">
+                <div><i class="fas fa-envelope"></i> hello@ianyuhi.com</div>
+                <div><i class="fas fa-phone"></i> +1 (555) 123-4567</div>
+                <div><i class="fas fa-map-marker-alt"></i> 123 Horology Lane, NYC 10001</div>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                    <a href="#"><i class="fab fa-reddit-alien"></i></a>
+                </div>
+            </div>
+            <form class="contact-form" id="contactForm">
+                <input type="text" placeholder="Your Name" required />
+                <input type="email" placeholder="Your Email" required />
+                <textarea rows="4" placeholder="Your Message"></textarea>
+                <button type="submit" class="btn-primary">Send Message</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- ========== FOOTER ========== -->
+<footer class="footer">
+    <div class="container">
+        <div class="footer-grid">
+            <div>
+                <h4><i class="fas fa-clock"></i> IAN YUHI</h4>
+                <p>Tailored essentials for the modern gentleman.</p>
+            </div>
+            <div>
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="shop.html">Shop All</a></li>
+                    <li><a href="#collections">Collections</a></li>
+                    <li><a href="#about">About Us</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>Policies</h4>
+                <ul>
+                    <li><a href="warranty.html">Warranty</a></li>
+                    <li><a href="returns.html">Returns</a></li>
+                    <li><a href="shipping.html">Shipping</a></li>
+                    <li><a href="privacy.html">Privacy</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>Newsletter</h4>
+                <p>Get exclusive drops and styling updates.</p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="Your email" />
+                    <button type="submit"><i class="fas fa-arrow-right"></i></button>
+                </form>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 IAN YUHI. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- ========== CART SIDEBAR ========== -->
+<div class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+        <h3>Your Cart</h3>
+        <button class="cart-close" onclick="toggleCart()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="cart-items" id="cartItems">
+        <p class="empty-cart">Your cart is empty.</p>
+    </div>
+    <div class="cart-footer">
+        <div class="cart-total">
+            <span>Total:</span>
+            <span id="cartTotal">$0.00</span>
+        </div>
+        <button class="btn-primary" id="checkoutBtn">Proceed to Checkout</button>
+    </div>
+</div>
+
+<div class="cart-overlay" onclick="toggleCart()"></div>
+
+<!-- Toast notification -->
+<div id="toast" class="toast" aria-live="polite" aria-atomic="true"></div>
+
+<script src="script.js"></script>
+</body>
+</html>

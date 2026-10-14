@@ -1,0 +1,26 @@
+[
+  {
+    "id": "admin-1791941659786",
+    "name": "Admin Test",
+    "email": "admin@test.com",
+    "passwordHash": "$2a$12$KKOsVjTkCS84n9mbRvvpkekMdzGSFDBm3FpE1lxEkBuZ6y1XaeOYi",
+    "permissions": {
+      "admin": true,
+      "shop": true,
+      "checkout": true,
+      "view": true
+    }
+  },
+  {
+    "id": "admin-1791941673202",
+    "name": "Auth Check",
+    "email": "admincheck134364152731927502@test.com",
+    "passwordHash": "$2a$12$YPWVjuh.mXrLP7JUt7UB7.RBYZUVGyGmJ7H8Bped/or5rEqjA/mpa",
+    "permissions": {
+      "admin": true,
+      "shop": true,
+      "checkout": true,
+      "view": true
+    }
+  }
+]

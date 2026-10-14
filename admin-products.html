@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Product Management | IAN YUHI</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-logo">
+                <a href="index.html"><i class="fas fa-clock"></i> IAN YUHI</a>
+            </div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="shop.html">Shop All</a></li>
+                <li><a href="checkout.html">Checkout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="page-back-link">
+        <a href="admin-dashboard.html"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+    </div>
+
+    <main class="page-shell admin-page">
+        <div class="container">
+            <div class="admin-card">
+                <div class="admin-header">
+                    <div>
+                        <p class="eyebrow">Product Management</p>
+                        <h1>Manage Products</h1>
+                        <p>Create, update, and delete product listings with price, cost, tax, and shipping details.</p>
+                    </div>
+                    <div class="admin-header-actions">
+                        <button id="adminLogoutBtn" class="btn-secondary" type="button">Logout</button>
+                    </div>
+                </div>
+
+                <section class="admin-section" id="adminProductSection">
+                    <form id="adminProductForm" class="admin-form">
+                        <input type="hidden" id="productId" />
+                        <label>
+                            Product Name
+                            <input type="text" id="productName" placeholder="Product name" required />
+                        </label>
+                        <label>
+                            Brand
+                            <input type="text" id="productBrand" placeholder="Brand" required />
+                        </label>
+                        <label>
+                            Add to Collection
+                            <select id="productCategory" required>
+                                <option value="suit">Suits page</option>
+                                <option value="shoe">Shoes page</option>
+                                <option value="watch">Watches page</option>
+                            </select>
+                        </label>
+                        <label>
+                            Price
+                            <input type="number" id="productPrice" placeholder="Retail price" step="0.01" required />
+                        </label>
+                        <label>
+                            Cost
+                            <input type="number" id="productCost" placeholder="Cost price" step="0.01" required />
+                        </label>
+                        <label>
+                            Tax
+                            <input type="number" id="productTax" placeholder="Tax amount" step="0.01" required />
+                        </label>
+                        <label>
+                            Shipping
+                            <input type="number" id="productShipping" placeholder="Shipping cost" step="0.01" required />
+                        </label>
+                        <label>
+                            Add Images
+                            <input type="file" id="productImageFile" accept="image/*" multiple />
+                            <input type="hidden" id="productImageData" />
+                        </label>
+                        <div id="productImagePreview" class="image-preview"></div>
+                        <label>
+                            Description
+                            <textarea id="productDescription" placeholder="Product description" rows="4" required></textarea>
+                        </label>
+                        <div class="admin-form-actions">
+                            <button type="submit" class="btn-primary">Save Product</button>
+                            <button type="button" id="productCancelBtn" class="btn-secondary">Cancel</button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="admin-section">
+                    <h2>Product Catalog</h2>
+                    <div id="adminProductList" class="permissions-table"></div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

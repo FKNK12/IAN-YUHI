@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Thank You | IAN YUHI</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <div class="nav-logo">
+        <a href="index.html"><i class="fas fa-clock"></i> IAN YUHI</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-shell">
+    <div class="container">
+      <div class="admin-card" style="padding:32px; text-align:center;">
+        <h1>Thank you for placing the order</h1>
+        <p id="thankMessage" class="details"></p>
+
+        <div id="orderInfo" style="margin-top:18px; text-align:left; max-width:680px; margin-left:auto; margin-right:auto;">
+        </div>
+
+        <div style="margin-top:20px;">
+          <button id="emailCopy" class="btn-secondary">Copy Email Message</button>
+          <button id="smsCopy" class="btn-secondary">Copy SMS Message</button>
+        </div>
+
+        <p style="margin-top:18px;"><a href="shop.html" class="btn-primary">Continue Shopping</a></p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    (function(){
+      const LAST_KEY = 'ian-yuhi-last-order';
+
+      function getLast() {
+        try { return JSON.parse(localStorage.getItem(LAST_KEY) || 'null'); } catch (e) { return null; }
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        const last = getLast();
+        const msg = document.getElementById('thankMessage');
+        const info = document.getElementById('orderInfo');
+        const emailCopy = document.getElementById('emailCopy');
+        const smsCopy = document.getElementById('smsCopy');
+
+        if (!last) {
+          msg.textContent = 'No recent order found.';
+          return;
+        }
+
+        if (last.paymentConfirmed) {
+          msg.textContent = `Thank you ${last.name}! Your payment was processed successfully.`;
+        } else {
+          msg.textContent = `Thank you ${last.name}! Your order is being processed and waiting for admin payment confirmation.`;
+        }
+
+        const createInfoLine = (label, value) => {
+          const row = document.createElement('div');
+          const labelEl = document.createElement('strong');
+          labelEl.textContent = `${label}: `;
+          row.appendChild(labelEl);
+          row.appendChild(document.createTextNode(value));
+          return row;
+        };
+
+        const appendLine = (label, value) => info.appendChild(createInfoLine(label, value));
+
+        appendLine('Confirmation', last.confirmation);
+        appendLine('Tracking', last.tracking);
+        appendLine('Amount', `$${last.total.toFixed(2)}`);
+        appendLine('Email', last.email);
+        appendLine('Phone', last.phone || 'N/A');
+
+        const paymentResult = JSON.parse(localStorage.getItem('ian-yuhi-payment-result') || '{}');
+        const emailStatus = paymentResult.emailResult ? (paymentResult.emailResult.sent ? 'Sent' : `Not sent (${paymentResult.emailResult.error || paymentResult.emailResult.warning || 'unknown'})`) : 'Not available';
+        const smsStatus = paymentResult.smsResult ? (paymentResult.smsResult.sent ? 'Sent' : `Not sent (${paymentResult.smsResult.error || paymentResult.smsResult.warning || 'unknown'})`) : 'Not available';
+
+        appendLine('Email status', emailStatus);
+        appendLine('SMS status', smsStatus);
+
+        const emailBody = `Hello ${last.name},\n\nThank you for your order. Your confirmation number is ${last.confirmation} and tracking number is ${last.tracking}.\n\nAmount: $${last.total.toFixed(2)}\n\nRegards,\nIAN YUHI`;
+        const smsBody = `Order ${last.confirmation} confirmed. Tracking ${last.tracking}. Thank you!`;
+
+        emailCopy.addEventListener('click', () => {
+          navigator.clipboard.writeText(`To: ${last.email}\n\n${emailBody}`);
+          emailCopy.textContent = 'Copied';
+          setTimeout(() => emailCopy.textContent = 'Copy Email Message', 1500);
+        });
+
+        smsCopy.addEventListener('click', () => {
+          navigator.clipboard.writeText(`To: ${last.phone || 'PHONE'}\n\n${smsBody}`);
+          smsCopy.textContent = 'Copied';
+          setTimeout(() => smsCopy.textContent = 'Copy SMS Message', 1500);
+        });
+      });
+    })();
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+</body>
+</html>

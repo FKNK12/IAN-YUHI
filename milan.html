@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Milan | IAN YUHI</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container">
+        <div class="nav-logo">
+          <a href="index.html"><i class="fas fa-clock"></i> IAN YUHI</a>
+        </div>
+        <ul class="nav-links" id="navLinks">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="shop.html">Shop All</a></li>
+          <li><a href="checkout.html" class="cart-btn"><i class="fas fa-shopping-bag"></i> Checkout</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="page-back-link">
+      <a href="javascript:history.back()"><i class="fas fa-arrow-left"></i> Back</a>
+    </div>
+
+    <main class="page-shell">
+      <div class="container">
+        <div class="product-view-card">
+          <div class="product-gallery">
+            <img src="image/suit.avif" alt="Milan Classic Burgundy Suit" />
+          </div>
+
+          <div>
+            <p class="product-brand">MILAN</p>
+            <h1>Classic Burgundy Suit</h1>
+            <p class="price">$420</p>
+            <p class="details">A refined burgundy suit with a sharp double-breasted cut and a confident, distinguished silhouette.</p>
+            <div class="product-story">
+              <h3>Milan</h3>
+              <p class="details">Classic tailoring with a confident burgundy statement.</p>
+            </div>
+            <div class="meta">
+              <span>Premium Collection</span>
+              <span>Free Shipping</span>
+              <span>Authenticity Guaranteed</span>
+            </div>
+            <div class="product-actions product-view-actions">
+              <button class="btn-primary" onclick="addToCart(1)">Add to Cart</button>
+              <button class="btn-secondary" onclick="buyNow(1)">Buy Now</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

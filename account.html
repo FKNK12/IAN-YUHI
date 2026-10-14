@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Account | IAN YUHI</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-logo">
+                <a href="index.html"><i class="fas fa-clock"></i> IAN YUHI</a>
+            </div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="shop.html">Shop All</a></li>
+                <li><a href="account.html">Account</a></li>
+                <li><button type="button" class="cart-btn" onclick="toggleCart()"><i class="fas fa-shopping-bag"></i> <span id="cartCount">0</span></button></li>
+            </ul>
+            <div class="hamburger" onclick="toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-back-link">
+        <a href="shop.html"><i class="fas fa-arrow-left"></i> Back to Shop</a>
+    </div>
+
+    <main class="page-shell admin-page">
+        <div class="container">
+            <div class="admin-card">
+                <div class="admin-header">
+                    <div>
+                        <p class="eyebrow">Customer Account</p>
+                        <h1 id="customerAccountWelcome">Your account</h1>
+                        <p id="customerAccountStatus">Create an account or sign in to continue shopping.</p>
+                    </div>
+                    <div class="admin-header-actions">
+                        <button id="customerLogoutBtn" class="btn-secondary hidden" type="button">Logout</button>
+                    </div>
+                </div>
+
+                <div class="account-grid">
+                    <section class="admin-section">
+                        <h2>Create Account</h2>
+                        <form id="customerSignupForm" class="admin-form">
+                            <label>
+                                Full Name
+                                <input type="text" id="customerSignupName" placeholder="Your full name" required />
+                            </label>
+                            <label>
+                                Email
+                                <input type="email" id="customerSignupEmail" placeholder="you@example.com" required />
+                            </label>
+                            <label>
+                                Phone Number
+                                <input type="tel" id="customerSignupPhone" placeholder="Your phone number" required />
+                            </label>
+                            <label>
+                                Password
+                                <input type="password" id="customerSignupPassword" placeholder="Create password" required />
+                            </label>
+                            <label>
+                                Confirm Password
+                                <input type="password" id="customerSignupConfirmPassword" placeholder="Confirm password" required />
+                            </label>
+                            <button type="submit" class="btn-primary">Create Account</button>
+                            <p id="customerSignupMessage" class="details"></p>
+                        </form>
+                    </section>
+
+                    <section class="admin-section">
+                        <h2>Login</h2>
+                        <form id="customerLoginForm" class="admin-form">
+                            <label>
+                                Email
+                                <input type="email" id="customerLoginEmail" placeholder="you@example.com" required />
+                            </label>
+                            <label>
+                                Password
+                                <input type="password" id="customerLoginPassword" placeholder="Enter password" required />
+                            </label>
+                            <button type="submit" class="btn-secondary">Login</button>
+                            <p id="customerLoginMessage" class="details"></p>
+                        </form>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

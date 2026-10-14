@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Customer Accounts | IAN YUHI</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-logo">
+                <a href="index.html"><i class="fas fa-clock"></i> IAN YUHI</a>
+            </div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="shop.html">Shop All</a></li>
+                <li><a href="checkout.html">Checkout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="page-back-link">
+        <a href="admin-dashboard.html"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+    </div>
+
+    <main class="page-shell admin-page">
+        <div class="container">
+            <div class="admin-card">
+                <div class="admin-header">
+                    <div>
+                        <p class="eyebrow">Customer Accounts</p>
+                        <h1>Registered Users</h1>
+                        <p>Review all customer account details, including names, email addresses, and phone numbers.</p>
+                    </div>
+                    <div class="admin-header-actions">
+                        <div class="payment-summary-card small-card">
+                            <p>Total Users</p>
+                            <h2 id="customerCount">0</h2>
+                        </div>
+                    </div>
+                </div>
+
+                <section class="admin-section">
+                    <div id="customerUserList" class="permissions-table"></div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

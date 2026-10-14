@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checkout | IAN YUHI</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <script src="https://js.stripe.com/v3/"></script>
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container">
+        <div class="nav-logo">
+          <a href="index.html"><i class="fas fa-clock"></i> IAN YUHI</a>
+        </div>
+        <ul class="nav-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="shop.html">Shop All</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="page-back-link">
+      <a href="javascript:history.back()"><i class="fas fa-arrow-left"></i> Back</a>
+    </div>
+
+    <main class="page-shell checkout-page">
+      <div class="container">
+        <div class="checkout-layout">
+          <section class="checkout-card">
+            <h1>Checkout</h1>
+            <p class="checkout-subtitle">Complete your purchase in a few steps.</p>
+            <div id="checkoutSummary"></div>
+          </section>
+
+          <section class="checkout-card">
+            <form id="checkoutForm" class="checkout-form">
+              <label>
+                Full name
+                <input type="text" name="name" required />
+              </label>
+              <label>
+                Email address
+                <input type="email" name="email" required />
+              </label>
+              <label>
+                Phone number
+                <input type="tel" name="phone" id="checkoutPhone" placeholder="Optional phone number" />
+              </label>
+              <label>
+                Shipping address
+                <textarea name="address" rows="4" required></textarea>
+              </label>
+              <label>
+                Quantity
+                <input type="number" name="quantity" id="quantityInput" min="1" value="1" />
+              </label>
+              <label>
+                Payment method
+                <select name="paymentMethod" id="paymentMethod">
+                  <option value="card">Credit Card</option>
+                  <option value="cash">Cash App</option>
+                  <option value="apple">Apple Pay</option>
+                </select>
+              </label>
+              <div id="cardDetails" class="card-details">
+                <label>
+                  Card details
+                  <div id="cardElement" class="card-element"></div>
+                </label>
+                <div id="cardErrors" class="card-errors" role="alert"></div>
+              </div>
+              <button type="submit" class="btn-primary">Place Order</button>
+              <p id="checkoutMessage" class="checkout-message"></p>
+            </form>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

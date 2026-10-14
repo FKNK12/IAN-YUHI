@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Processing Payment | IAN YUHI</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <div class="nav-logo">
+        <a href="index.html"><i class="fas fa-clock"></i> IAN YUHI</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-shell">
+    <div class="container">
+      <div class="admin-card" style="text-align:center; padding:40px;">
+        <h1>Processing Payment</h1>
+        <p id="processingText" class="details">Please wait while we process your payment.</p>
+        <div id="processingSpinner" style="margin: 24px auto; width:80px; height:80px; border-radius:50%; background: linear-gradient(90deg,var(--gold), rgba(201,168,76,0.3)); animation: spin 1s linear infinite;"></div>
+        <p id="processingDetails" class="details"></p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    (function(){
+      const PENDING_KEY = 'ian-yuhi-pending-order';
+      const LAST_KEY = 'ian-yuhi-last-order';
+      const ORDERS_KEY = 'ian-yuhi-orders';
+
+      function genConfirmation() {
+        return 'CN' + Math.random().toString(36).slice(2,10).toUpperCase();
+      }
+      function genTracking() {
+        return 'TRK' + Math.random().toString(36).slice(2,10).toUpperCase();
+      }
+      function genTransactionId() {
+        return 'TX' + Math.random().toString(36).slice(2,12).toUpperCase();
+      }
+
+      function loadPending() {
+        try { return JSON.parse(localStorage.getItem(PENDING_KEY) || 'null'); } catch (e) { return null; }
+      }
+
+      function saveOrder(order) {
+        try {
+          const list = JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
+          list.push(order);
+          localStorage.setItem(ORDERS_KEY, JSON.stringify(list));
+          localStorage.setItem(LAST_KEY, JSON.stringify(order));
+        } catch (e) {
+          localStorage.setItem(LAST_KEY, JSON.stringify(order));
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        const pending = loadPending();
+        const details = document.getElementById('processingDetails');
+        if (!pending) {
+          document.getElementById('processingText').textContent = 'No order found. Redirecting to shop...';
+          setTimeout(() => window.location.href = 'shop.html', 1500);
+          return;
+        }
+
+        details.textContent = `Order for ${pending.name} — ${pending.email}. Amount: $${pending.total.toFixed(2)}. Your order is being processed and will be confirmed by admin.`;
+
+        const sendToBackend = async () => {
+          const statusText = document.getElementById('processingText');
+          try {
+            statusText.textContent = 'Processing payment and sending confirmation...';
+            const response = await fetch('http://localhost:3000/api/process-order', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(pending)
+            });
+
+            if (!response.ok) {
+              throw new Error(`Backend returned ${response.status}`);
+            }
+
+            const result = await response.json();
+            const completed = {
+              ...pending,
+              ...result.order,
+              confirmation: result.order?.confirmation || genConfirmation(),
+              tracking: result.order?.tracking || genTracking(),
+              transactionId: result.order?.transactionId || genTransactionId(),
+              paymentAttemptedAt: new Date().toISOString(),
+              paymentConfirmed: false,
+              paymentStatus: 'Pending Admin Payment Review',
+              status: 'Pending Payment',
+              paidAt: new Date().toISOString()
+            };
+
+            localStorage.setItem(LAST_KEY, JSON.stringify(completed));
+            localStorage.setItem('ian-yuhi-payment-result', JSON.stringify({
+              emailResult: result.emailResult,
+              smsResult: result.smsResult
+            }));
+            saveOrder(completed);
+            localStorage.removeItem(PENDING_KEY);
+            window.location.href = 'thank-you.html';
+          } catch (error) {
+            details.textContent = `Backend unavailable. Completing order locally and awaiting admin confirmation.`;
+            setTimeout(() => {
+              const conf = genConfirmation();
+              const tracking = genTracking();
+              const completed = {
+                ...pending,
+                confirmation: conf,
+                tracking: tracking,
+                transactionId: genTransactionId(),
+                paymentAttemptedAt: new Date().toISOString(),
+                paymentConfirmed: false,
+                paymentStatus: 'Pending Payment',
+                status: 'Pending Payment'
+              };
+              saveOrder(completed);
+              localStorage.removeItem(PENDING_KEY);
+              localStorage.setItem('ian-yuhi-payment-result', JSON.stringify({
+                emailResult: { sent: false, warning: 'Backend unavailable.' },
+                smsResult: { sent: false, warning: 'Backend unavailable.' }
+              }));
+              window.location.href = 'thank-you.html';
+            }, 1800);
+          }
+        };
+
+        sendToBackend();
+      });
+    })();
+  </script>
+
+  <style>
+    @keyframes spin { from { transform: rotate(0deg);} to { transform: rotate(360deg);} }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+</body>
+</html>

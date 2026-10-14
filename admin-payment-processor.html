@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Payment Processor | IAN YUHI</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-logo">
+                <a href="index.html"><i class="fas fa-clock"></i> IAN YUHI</a>
+            </div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="shop.html">Shop All</a></li>
+                <li><a href="checkout.html">Checkout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="page-back-link">
+        <a href="admin-dashboard.html"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+    </div>
+
+    <main class="page-shell admin-page">
+        <div class="container">
+            <div class="admin-card">
+                <div class="admin-header">
+                    <div>
+                        <p class="eyebrow">Payment Processor</p>
+                        <h1>Approve Payments</h1>
+                        <p>Review pending payments, confirm receipts, and approve orders before shipping.</p>
+                    </div>
+                </div>
+
+                <section class="admin-section">
+                    <div class="payment-summary-grid payment-panel-summary">
+                        <div class="payment-summary-card">
+                            <p>Confirmed Payments</p>
+                            <h2 id="confirmedPaymentsCount">0</h2>
+                        </div>
+                        <div class="payment-summary-card">
+                            <p>Amount Received</p>
+                            <h2 id="receivedAmount">$0.00</h2>
+                        </div>
+                        <div class="payment-summary-card">
+                            <p>Pending Approvals</p>
+                            <h2 id="pendingPaymentsCount">0</h2>
+                        </div>
+                        <div class="payment-summary-card">
+                            <p>Pending Amount</p>
+                            <h2 id="pendingAmount">$0.00</h2>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="admin-section">
+                    <div id="pendingPaymentList" class="approval-table"></div>
+                </section>
+
+                <section class="admin-section">
+                    <div class="admin-header">
+                        <div>
+                            <h2>Approved Payments</h2>
+                        </div>
+                    </div>
+                    <div id="approvedPaymentList" class="approval-table"></div>
+                </section>
+
+                <section class="admin-section">
+                    <div class="admin-header">
+                        <div>
+                            <h2>Denied Payments</h2>
+                        </div>
+                    </div>
+                    <div id="deniedPaymentList" class="approval-table"></div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function getProcessedOrders() {
+            try {
+                return JSON.parse(localStorage.getItem('ian-yuhi-orders') || '[]');
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function getWaitingReviewOrders() {
+            return getProcessedOrders().filter(order => {
+                const isConfirmedForProcessor = order.paymentConfirmed === true;
+                const isWaitingReview = order.paymentStatus === 'Payment Received' || order.status === 'Waiting Review';
+                return isConfirmedForProcessor && isWaitingReview && order.status !== 'Approved' && order.status !== 'Confirmed' && order.status !== 'Denied';
+            });
+        }
+
+        function getApprovedOrders() {
+            return getProcessedOrders().filter(order => order.paymentStatus === 'Approved' || order.status === 'Approved' || order.status === 'Confirmed');
+        }
+
+        function getDeniedOrders() {
+            return getProcessedOrders().filter(order => order.status === 'Denied');
+        }
+
+        function renderApprovalTable(listId, orders, options = {}) {
+            const list = document.getElementById(listId);
+            if (!list) return;
+
+            if (!orders.length) {
+                list.innerHTML = '<p class="empty-cart">No entries in this section.</p>';
+                return;
+            }
+
+            list.innerHTML = orders.map(order => {
+                const itemSummary = (order.items || []).map(item => `${item.name} (${item.quantity})`).join(', ') || 'No item details';
+                const statusText = options.statusLabel ? options.statusLabel(order) : '';
+                const actionHtml = options.actionHtml ? options.actionHtml(order) : '';
+
+                return `
+                    <div class="approval-row">
+                        <span>${escapeHtml(order.name)}</span>
+                        <span>${escapeHtml(order.email)}</span>
+                        <span>${escapeHtml(order.phone || 'N/A')}</span>
+                        <span>$${Number(order.total).toFixed(2)}</span>
+                        <span>${escapeHtml(itemSummary)}</span>
+                        <span>${escapeHtml(order.paymentMethod || 'Unknown')}</span>
+                        <span>${escapeHtml(order.transactionId || 'N/A')}</span>
+                        <span>${statusText}</span>
+                        <span>${actionHtml}</span>
+                    </div>
+                `;
+            }).join('');
+
+            list.innerHTML = `
+                <div class="approval-row approval-header">
+                    <span>Name</span>
+                    <span>Email</span>
+                    <span>Phone</span>
+                    <span>Amount</span>
+                    <span>Items</span>
+                    <span>Method</span>
+                    <span>Transaction</span>
+                    <span>Status</span>
+                    <span>Action</span>
+                </div>
+                ${list.innerHTML}
+            `;
+        }
+
+        function renderProcessorOrders() {
+            const waitingOrders = getWaitingReviewOrders();
+            const approvedOrders = getApprovedOrders();
+            const deniedOrders = getDeniedOrders();
+
+            renderApprovalTable('pendingPaymentList', waitingOrders, {
+                statusLabel: () => '<span class="status-pill waiting-review">Waiting Review</span>',
+                actionHtml: order => `
+                    <button class="btn-primary btn-small" onclick="approvePayment('${escapeHtml(order.id)}')">Approve</button>
+                    <button class="btn-danger btn-small" onclick="deleteProcessorOrder('${escapeHtml(order.id)}')">Delete</button>
+                `
+            });
+
+            renderApprovalTable('approvedPaymentList', approvedOrders, {
+                statusLabel: () => '<span class="status-pill approved">Approved</span>',
+                actionHtml: order => `<button class="btn-danger btn-small" onclick="deleteProcessorOrder('${escapeHtml(order.id)}')">Delete</button>`
+            });
+
+            renderApprovalTable('deniedPaymentList', deniedOrders, {
+                statusLabel: () => '<span class="status-pill denied">Denied</span>',
+                actionHtml: order => `<button class="btn-danger btn-small" onclick="deleteProcessorOrder('${escapeHtml(order.id)}')">Delete</button>`
+            });
+        }
+
+        function updatePaymentSummary() {
+            const orders = getProcessedOrders();
+            const waitingOrders = getWaitingReviewOrders();
+            const approvedOrders = getApprovedOrders();
+            const deniedOrders = getDeniedOrders();
+            const totalReceived = approvedOrders.reduce((sum, order) => sum + (Number(order.total) || 0), 0);
+
+            document.getElementById('confirmedPaymentsCount').textContent = approvedOrders.length;
+            document.getElementById('receivedAmount').textContent = `$${totalReceived.toFixed(2)}`;
+            document.getElementById('pendingPaymentsCount').textContent = waitingOrders.length;
+            document.getElementById('pendingAmount').textContent = `$${waitingOrders.reduce((sum, order) => sum + (Number(order.total) || 0), 0).toFixed(2)}`;
+            document.getElementById('confirmedPaymentsCount').textContent = approvedOrders.length;
+        }
+
+        function approvePayment(orderId) {
+            const orders = getProcessedOrders();
+            const order = orders.find(o => String(o.id) === String(orderId));
+            if (!order) return;
+
+            const confirmed = window.confirm(`Approve this payment for ${order.name}?`);
+            if (!confirmed) return;
+
+            order.status = 'Approved';
+            order.paymentStatus = 'Approved';
+            order.paymentConfirmed = true;
+            order.paidAt = order.paidAt || new Date().toISOString();
+            localStorage.setItem('ian-yuhi-orders', JSON.stringify(orders));
+            updatePaymentSummary();
+            renderProcessorOrders();
+        }
+
+        function deleteProcessorOrder(orderId) {
+            const orders = getProcessedOrders();
+            const idx = orders.findIndex(o => String(o.id) === String(orderId));
+            if (idx === -1) return;
+
+            const order = orders[idx];
+            const confirmed = window.confirm(`Delete order for ${order.name} (${order.email})? This cannot be undone.`);
+            if (!confirmed) return;
+
+            orders.splice(idx, 1);
+            localStorage.setItem('ian-yuhi-orders', JSON.stringify(orders));
+            updatePaymentSummary();
+            renderProcessorOrders();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updatePaymentSummary();
+            renderProcessorOrders();
+        });
+    </script>
+</body>
+</html>

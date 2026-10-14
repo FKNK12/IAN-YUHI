@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Processed Orders | IAN YUHI</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-logo">
+                <a href="index.html"><i class="fas fa-clock"></i> IAN YUHI</a>
+            </div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="shop.html">Shop All</a></li>
+                <li><a href="checkout.html">Checkout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="page-back-link">
+        <a href="admin-dashboard.html"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+    </div>
+
+    <main class="page-shell admin-page">
+        <div class="container">
+            <div class="admin-card">
+                <div class="admin-header">
+                    <div>
+                        <p class="eyebrow">Order History</p>
+                        <h1>Processed Orders</h1>
+                        <p>Review order confirmations, tracking numbers, and customer contact details.</p>
+                    </div>
+                </div>
+
+                <section class="admin-section">
+                    <div class="payment-summary-grid">
+                        <div class="payment-summary-card">
+                            <p>Total Revenue</p>
+                            <h2 id="totalRevenueAmount">$0.00</h2>
+                        </div>
+                        <div class="payment-summary-card">
+                            <p>Payments Received</p>
+                            <h2 id="paymentsCount">0</h2>
+                        </div>
+                        <div class="payment-summary-card">
+                            <p>Shipped Orders</p>
+                            <h2 id="shippedOrdersCount">0</h2>
+                        </div>
+                        <div class="payment-summary-card">
+                            <p>Refunded Orders</p>
+                            <h2 id="refundedOrdersCount">0</h2>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="admin-section">
+                    <div class="admin-search-row">
+                        <input type="search" id="orderSearchInput" placeholder="Search by name, email, confirmation, tracking..." />
+                        <select id="orderSortSelect">
+                            <option value="newest">Sort by Newest</option>
+                            <option value="oldest">Sort by Oldest</option>
+                            <option value="total-high">Total: High to Low</option>
+                            <option value="total-low">Total: Low to High</option>
+                        </select>
+                        <select id="paymentMethodFilter" class="status-filter">
+                            <option value="all">Payment Method: All</option>
+                        </select>
+                        <select id="orderStatusFilter" class="status-filter">
+                            <option value="all">Status: All</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="refunded">Refunded</option>
+                        </select>
+                    </div>
+                    <div id="orderHistoryList" class="permissions-table"></div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function getProcessedOrders() {
+            try {
+                return JSON.parse(localStorage.getItem('ian-yuhi-orders') || '[]');
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function getUniquePaymentMethods() {
+            const orders = getProcessedOrders();
+            return [...new Set(orders.map(order => (order.paymentMethod || 'Unknown').trim()).filter(Boolean))];
+        }
+
+        function populatePaymentMethodFilter(selected = 'all') {
+            const filter = document.getElementById('paymentMethodFilter');
+            if (!filter) return;
+
+            const methods = getUniquePaymentMethods();
+            filter.innerHTML = `
+                <option value="all">Payment Method: All</option>
+                ${methods.map(method => `<option value="${method.toLowerCase()}">${method}</option>`).join('')}
+            `;
+            if ([...filter.options].some(option => option.value === selected)) {
+                filter.value = selected;
+            }
+        }
+
+        function updatePaymentSummary() {
+            const orders = getProcessedOrders();
+            const totalRevenue = orders.reduce((sum, order) => sum + (Number(order.total) || 0), 0);
+            const confirmedOrders = orders.filter(order => order.paymentConfirmed);
+            const shippedOrders = orders.filter(order => order.shipped).length;
+            const refundedOrders = orders.filter(order => order.refunded).length;
+
+            document.getElementById('totalRevenueAmount').textContent = `$${totalRevenue.toFixed(2)}`;
+            document.getElementById('paymentsCount').textContent = confirmedOrders.length;
+            document.getElementById('shippedOrdersCount').textContent = shippedOrders;
+            document.getElementById('refundedOrdersCount').textContent = refundedOrders;
+        }
+
+        function renderOrderHistory(filter = '', sortKey = 'newest', statusFilter = 'all', paymentMethodFilter = 'all') {
+            const list = document.getElementById('orderHistoryList');
+            if (!list) return;
+
+            const normalizedFilter = filter.trim().toLowerCase();
+            const filteredOrders = getProcessedOrders().filter(order => {
+                const matchesText = normalizedFilter
+                    ? [order.name, order.email, order.phone || '', order.confirmation, order.tracking, order.paymentMethod || '']
+                        .join(' ')
+                        .toLowerCase()
+                        .includes(normalizedFilter)
+                    : true;
+                const status = (order.status || (order.shipped ? 'shipped' : 'processing')).toLowerCase();
+                const matchesStatus = statusFilter === 'all' || status === statusFilter;
+                const matchesPaymentMethod = paymentMethodFilter === 'all' || ((order.paymentMethod || 'Unknown').toLowerCase() === paymentMethodFilter);
+                return matchesText && matchesStatus && matchesPaymentMethod;
+            });
+
+            if (!filteredOrders.length) {
+                list.innerHTML = '<p class="empty-cart">No processed orders found yet.</p>';
+                return;
+            }
+
+            filteredOrders.sort((a, b) => {
+                const aDate = new Date(a.paidAt || a.createdAt).getTime();
+                const bDate = new Date(b.paidAt || b.createdAt).getTime();
+                if (sortKey === 'oldest') return aDate - bDate;
+                if (sortKey === 'total-high') return (Number(b.total) || 0) - (Number(a.total) || 0);
+                if (sortKey === 'total-low') return (Number(a.total) || 0) - (Number(b.total) || 0);
+                return bDate - aDate;
+            });
+
+            list.innerHTML = filteredOrders.map(order => {
+                const orderStatus = escapeHtml(order.status || (order.shipped ? 'Shipped' : 'Processing'));
+                const paymentStatus = order.paymentConfirmed
+                    ? '<span class="status-pill confirmed">Confirmed</span>'
+                    : '<span class="status-pill pending">Pending</span>';
+
+                return `
+                    <div class="permissions-row">
+                        <span>${escapeHtml(order.name)}</span>
+                        <span>${escapeHtml(order.email)}</span>
+                        <span>${escapeHtml(order.phone || 'N/A')}</span>
+                        <span>${orderStatus}</span>
+                        <span>${paymentStatus}</span>
+                        <span>$${Number(order.total).toFixed(2)}</span>
+                        <span>${escapeHtml(order.paymentMethod || 'Unknown')}</span>
+                        <span>${escapeHtml(order.transactionId || 'N/A')}</span>
+                        <span>${escapeHtml(order.confirmation)}</span>
+                        <span>${escapeHtml(order.tracking)}</span>
+                        <span>${escapeHtml(new Date(order.paidAt || order.createdAt).toLocaleString())}</span>
+                    </div>
+                `;
+            }).join('');
+
+            list.innerHTML = `
+                <div class="permissions-row" style="font-weight:700; color: var(--gold);">
+                    <span>Name</span>
+                    <span>Email</span>
+                    <span>Phone</span>
+                    <span>Status</span>
+                    <span>Payment</span>
+                    <span>Total</span>
+                    <span>Method</span>
+                    <span>Txn ID</span>
+                    <span>Confirmation</span>
+                    <span>Tracking</span>
+                    <span>Date</span>
+                </div>
+                ${list.innerHTML}
+            `;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const orderSearchInput = document.getElementById('orderSearchInput');
+            const orderSortSelect = document.getElementById('orderSortSelect');
+            const paymentMethodFilter = document.getElementById('paymentMethodFilter');
+            const orderStatusFilter = document.getElementById('orderStatusFilter');
+
+            const getCurrentFilter = () => orderSearchInput?.value || '';
+            const getCurrentSort = () => orderSortSelect?.value || 'newest';
+            const getCurrentPaymentMethod = () => paymentMethodFilter?.value || 'all';
+            const getCurrentStatus = () => orderStatusFilter?.value || 'all';
+
+            populatePaymentMethodFilter(getCurrentPaymentMethod());
+            updatePaymentSummary();
+            renderOrderHistory(getCurrentFilter(), getCurrentSort(), getCurrentStatus(), getCurrentPaymentMethod());
+
+            orderSearchInput?.addEventListener('input', () => {
+                renderOrderHistory(getCurrentFilter(), getCurrentSort(), getCurrentStatus(), getCurrentPaymentMethod());
+            });
+            orderSortSelect?.addEventListener('change', () => {
+                renderOrderHistory(getCurrentFilter(), getCurrentSort(), getCurrentStatus(), getCurrentPaymentMethod());
+            });
+            paymentMethodFilter?.addEventListener('change', () => {
+                renderOrderHistory(getCurrentFilter(), getCurrentSort(), getCurrentStatus(), getCurrentPaymentMethod());
+            });
+            orderStatusFilter?.addEventListener('change', () => {
+                renderOrderHistory(getCurrentFilter(), getCurrentSort(), getCurrentStatus(), getCurrentPaymentMethod());
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Order History | IAN YUHI</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-logo">
+                <a href="index.html"><i class="fas fa-clock"></i> IAN YUHI</a>
+            </div>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="shop.html">Shop All</a></li>
+                <li><a href="checkout.html">Checkout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="page-back-link">
+        <a href="admin-dashboard.html"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+    </div>
+
+    <main class="page-shell admin-page">
+        <div class="container">
+            <div class="admin-card">
+                <div class="admin-header">
+                    <div>
+                        <p class="eyebrow">Order History</p>
+                        <h1>Processed Orders</h1>
+                        <p>Review order confirmations, tracking numbers, and customer contact details.</p>
+                    </div>
+                </div>
+
+                <section class="admin-section">
+                    <div class="payment-summary-grid">
+                        <div class="payment-summary-card">
+                            <p>Total Revenue</p>
+                            <h2 id="totalRevenueAmount">$0.00</h2>
+                        </div>
+                        <div class="payment-summary-card">
+                            <p>Payments Received</p>
+                            <h2 id="paymentsCount">0</h2>
+                        </div>
+                        <div class="payment-summary-card">
+                            <p>Shipped Orders</p>
+                            <h2 id="shippedOrdersCount">0</h2>
+                        </div>
+                        <div class="payment-summary-card">
+                            <p>Refunded Orders</p>
+                            <h2 id="refundedOrdersCount">0</h2>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="admin-section">
+                    <div class="admin-header">
+                        <div>
+                            <h2>Payment Processor</h2>
+                            <p>Use this processor to confirm pending payments, review payment totals, and approve orders before shipping.</p>
+                        </div>
+                    </div>
+                    <div class="payment-summary-grid payment-panel-summary">
+                        <div class="payment-summary-card">
+                            <p>Confirmed Payments</p>
+                            <h2 id="confirmedPaymentsCount">0</h2>
+                        </div>
+                        <div class="payment-summary-card">
+                            <p>Amount Received</p>
+                            <h2 id="receivedAmount">$0.00</h2>
+                        </div>
+                        <div class="payment-summary-card">
+                            <p>Pending Approvals</p>
+                            <h2 id="pendingPaymentsCount">0</h2>
+                        </div>
+                        <div class="payment-summary-card">
+                            <p>Pending Amount</p>
+                            <h2 id="pendingAmount">$0.00</h2>
+                        </div>
+                    </div>
+                    <div id="pendingPaymentList" class="approval-table"></div>
+                </section>
+
+                <section class="admin-section">
+                    <div class="admin-header">
+                        <div>
+                            <h2>Processed Orders</h2>
+                            <p>View confirmed orders, shipments, and refunds in one place.</p>
+                        </div>
+                    </div>
+                    <div class="admin-search-row">
+                        <input type="search" id="orderSearchInput" placeholder="Search by name, email, confirmation, tracking..." />
+                        <select id="orderSortSelect">
+                            <option value="newest">Sort by Newest</option>
+                            <option value="oldest">Sort by Oldest</option>
+                            <option value="total-high">Total: High to Low</option>
+                            <option value="total-low">Total: Low to High</option>
+                        </select>
+                        <select id="paymentMethodFilter" class="status-filter">
+                            <option value="all">Payment Method: All</option>
+                        </select>
+                        <select id="orderStatusFilter" class="status-filter">
+                            <option value="all">Status: All</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="refunded">Refunded</option>
+                        </select>
+                        <button id="exportCsvBtn" class="btn-primary btn-small">Export CSV</button>
+                        <button id="exportJsonBtn" class="btn-secondary btn-small">Export JSON</button>
+                    </div>
+                    <div id="orderHistoryList" class="permissions-table"></div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <div id="orderDetailModal" class="modal hidden">
+        <div class="modal-content">
+            <button id="closeOrderModal" class="btn-secondary modal-close">×</button>
+            <h2>Order Details</h2>
+            <button id="printOrderBtn" class="btn-primary btn-small" style="margin-bottom: 14px;">Print Details</button>
+            <div id="orderDetailContent"></div>
+        </div>
+    </div>
+
+    <script>
+        window.location.replace('admin-processed-orders.html');
+
+        function getProcessedOrders() {
+            try {
+                return JSON.parse(localStorage.getItem('ian-yuhi-orders') || '[]');
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function getQueryParam(name) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(name);
+        }
+
+        async function syncOrdersFromBackend() {
+            try {
+                const response = await fetch('http://localhost:3000/api/admin/orders');
+                if (!response.ok) return;
+                const orders = await response.json();
+                if (Array.isArray(orders) && orders.length) {
+                    localStorage.setItem('ian-yuhi-orders', JSON.stringify(orders));
+                }
+            } catch (error) {
+                // Backend unavailable; continue with localStorage data.
+            }
+        }
+
+        // Lightweight toast for admin page actions
+        function showToast(message, duration = 3000) {
+            let toast = document.getElementById('adminToast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'adminToast';
+                toast.className = 'toast';
+                document.body.appendChild(toast);
+            }
+            toast.textContent = message;
+            toast.classList.add('show');
+            clearTimeout(toast._hideTimeout);
+            toast._hideTimeout = setTimeout(() => toast.classList.remove('show'), duration);
+        }
+
+        // Sync a single order to the backend (upsert) if backend is available
+        async function syncOrderToBackend(order) {
+            try {
+                const response = await fetch('http://localhost:3000/api/process-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(order)
+                });
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({}));
+                    throw new Error(err.error || 'Failed to sync order to backend');
+                }
+                return true;
+            } catch (e) {
+                // not critical — backend may be offline
+                return false;
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function getUniquePaymentMethods() {
+            const orders = getProcessedOrders();
+            const methods = orders.map(order => escapeHtml((order.paymentMethod || 'Unknown').trim())).filter(Boolean);
+            return [...new Set(methods)];
+        }
+
+        function populatePaymentMethodFilter(selected = 'all') {
+            const filter = document.getElementById('paymentMethodFilter');
+            if (!filter) return;
+            const methods = getUniquePaymentMethods();
+            filter.innerHTML = `
+                <option value="all">Payment Method: All</option>
+                ${methods.map(method => `
+                    <option value="${method.toLowerCase()}">${method}</option>
+                `).join('')}
+            `;
+            if ([...filter.options].some(option => option.value === selected)) {
+                filter.value = selected;
+            }
+        }
+
+        function updatePaymentSummary() {
+            const orders = getProcessedOrders();
+            const totalRevenue = orders.reduce((sum, order) => sum + (Number(order.total) || 0), 0);
+            const confirmedOrders = orders.filter(order => order.paymentConfirmed);
+            const pendingOrders = orders.filter(order => !order.paymentConfirmed);
+            const paymentsReceived = confirmedOrders.length;
+            const receivedAmount = confirmedOrders.reduce((sum, order) => sum + (Number(order.total) || 0), 0);
+            const pendingPaymentsCount = pendingOrders.length;
+            const pendingAmount = pendingOrders.reduce((sum, order) => sum + (Number(order.total) || 0), 0);
+            const shippedOrders = orders.filter(order => order.shipped).length;
+            const refundedOrders = orders.filter(order => order.refunded).length;
+
+            const totalRevenueAmount = document.getElementById('totalRevenueAmount');
+            const paymentsCount = document.getElementById('paymentsCount');
+            const shippedOrdersCount = document.getElementById('shippedOrdersCount');
+            const refundedOrdersCount = document.getElementById('refundedOrdersCount');
+            const confirmedPaymentsCount = document.getElementById('confirmedPaymentsCount');
+            const receivedAmountEl = document.getElementById('receivedAmount');
+            const pendingPaymentsCountEl = document.getElementById('pendingPaymentsCount');
+            const pendingAmountEl = document.getElementById('pendingAmount');
+
+            if (totalRevenueAmount) totalRevenueAmount.textContent = `$${totalRevenue.toFixed(2)}`;
+            if (paymentsCount) paymentsCount.textContent = paymentsReceived;
+            if (shippedOrdersCount) shippedOrdersCount.textContent = shippedOrders;
+            if (refundedOrdersCount) refundedOrdersCount.textContent = refundedOrders;
+            if (confirmedPaymentsCount) confirmedPaymentsCount.textContent = paymentsReceived;
+            if (receivedAmountEl) receivedAmountEl.textContent = `$${receivedAmount.toFixed(2)}`;
+            if (pendingPaymentsCountEl) pendingPaymentsCountEl.textContent = pendingPaymentsCount;
+            if (pendingAmountEl) pendingAmountEl.textContent = `$${pendingAmount.toFixed(2)}`;
+        }
+
+        function getPendingPaymentOrders() {
+            return getProcessedOrders().filter(order => !order.paymentConfirmed);
+        }
+
+        function renderPendingPaymentApprovals() {
+            const list = document.getElementById('pendingPaymentList');
+            if (!list) return;
+
+            const orders = getPendingPaymentOrders();
+            if (!orders.length) {
+                list.innerHTML = '<p class="empty-cart">No pending payment approvals at the moment.</p>';
+                return;
+            }
+
+            list.innerHTML = orders.map(order => `
+                <div class="approval-row">
+                    <span>${escapeHtml(order.name)}</span>
+                    <span>${escapeHtml(order.email)}</span>
+                    <span>$${Number(order.total).toFixed(2)}</span>
+                    <span>${escapeHtml(order.paymentMethod || 'Unknown')}</span>
+                    <span>${escapeHtml(new Date(order.createdAt).toLocaleString())}</span>
+                    <span>
+                        <button class="btn-primary btn-small" onclick="confirmPayment('${escapeHtml(order.id)}')">Confirm Payment</button>
+                        <button class="btn-danger btn-small" onclick="deleteOrderById('${escapeHtml(order.id)}')">Delete</button>
+                    </span>
+                </div>
+            `).join('');
+
+            list.innerHTML = `
+                <div class="approval-row approval-header">
+                    <span>Name</span>
+                    <span>Email</span>
+                    <span>Amount</span>
+                    <span>Method</span>
+                    <span>Date</span>
+                    <span>Action</span>
+                </div>
+                ${list.innerHTML}
+            `;
+        }
+
+        function renderOrderHistory(filter = '', sortKey = 'newest', statusFilter = 'all', paymentMethodFilter = 'all') {
+            const list = document.getElementById('orderHistoryList');
+            if (!list) return;
+
+            const normalizedFilter = filter.trim().toLowerCase();
+            const indexedOrders = getProcessedOrders().map((order, index) => ({ order, index }));
+
+            const filteredOrders = indexedOrders.filter(({ order }) => {
+                const matchesText = normalizedFilter
+                    ? [order.name, order.email, order.phone || '', order.confirmation, order.tracking, order.paymentMethod || '']
+                        .join(' ')
+                        .toLowerCase()
+                        .includes(normalizedFilter)
+                    : true;
+                const status = (order.status || (order.shipped ? 'shipped' : 'processing')).toLowerCase();
+                const matchesStatus = (statusFilter === 'all') || status === statusFilter;
+                const matchesPaymentMethod = (paymentMethodFilter === 'all') || ((order.paymentMethod || 'Unknown').toLowerCase() === paymentMethodFilter);
+                return matchesText && matchesStatus && matchesPaymentMethod;
+            });
+
+            if (!filteredOrders.length) {
+                list.innerHTML = '<p class="empty-cart">No processed orders found yet.</p>';
+                return;
+            }
+
+            filteredOrders.sort((a, b) => {
+                const aDate = new Date(a.order.paidAt || a.order.createdAt).getTime();
+                const bDate = new Date(b.order.paidAt || b.order.createdAt).toLocaleString();
+
+                if (sortKey === 'oldest') {
+                    return aDate - bDate;
+                }
+                if (sortKey === 'total-high') {
+                    return b.order.total - a.order.total;
+                }
+                if (sortKey === 'total-low') {
+                    return a.order.total - b.order.total;
+                }
+                return bDate - aDate;
+            });
+
+            list.innerHTML = filteredOrders.map(({ order, index }) => {
+                const orderStatus = escapeHtml(order.status || (order.shipped ? 'Shipped' : 'Processing'));
+                const paymentIndicator = order.paymentConfirmed
+                    ? '<span class="status-pill confirmed">Confirmed</span>'
+                    : '<span class="status-pill pending">Pending</span>';
+                const shippedAction = order.shipped
+                    ? '<span class="status-pill shipped">Shipped</span>'
+                    : `<button class="btn-secondary btn-small" onclick="markOrderShipped(${index})">Mark Shipped</button>`;
+                const refundAction = order.refunded
+                    ? '<span class="status-pill refunded">Refunded</span>'
+                    : order.paymentConfirmed
+                        ? `<button class="btn-warning btn-small" onclick="refundOrder(${index})">Refund</button>`
+                        : '';
+
+                return `
+                    <div class="permissions-row">
+                        <span>${escapeHtml(order.name)}</span>
+                        <span>${escapeHtml(order.email)}</span>
+                        <span>${escapeHtml(order.phone || 'N/A')}</span>
+                        <span>${orderStatus}</span>
+                        <span>${paymentIndicator}</span>
+                        <span>$${Number(order.total).toFixed(2)}</span>
+                        <span>${escapeHtml(order.paymentMethod || 'Unknown')}</span>
+                        <span>${escapeHtml(order.transactionId || 'N/A')}</span>
+                        <span>${escapeHtml(order.confirmation)}</span>
+                        <span>${escapeHtml(order.tracking)}</span>
+                        <span>${escapeHtml(new Date(order.paidAt || order.createdAt).toLocaleString())}</span>
+                        <span>
+                            ${shippedAction}
+                            ${refundAction}
+                            <button class="btn-secondary btn-small" onclick="showOrderDetails(${index})">View</button>
+                            <button class="btn-danger btn-small" onclick="deleteOrder(${index})">Delete</button>
+                        </span>
+                    </div>
+                `;
+            }).join('');
+
+            list.innerHTML = `
+                <div class="permissions-row" style="font-weight:700; color: var(--gold);">
+                    <span>Name</span>
+                    <span>Email</span>
+                    <span>Phone</span>
+                    <span>Status</span>
+                    <span>Payment</span>
+                    <span>Method</span>
+                    <span>Txn ID</span>
+                    <span>Confirmation</span>
+                    <span>Tracking</span>
+                    <span>Date</span>
+                    <span>Action</span>
+                </div>
+                ${list.innerHTML}
+            `;
+        }
+
+        function downloadCsv(filename, csvContent) {
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function exportOrdersToCsv() {
+            const orders = getProcessedOrders();
+            if (!orders.length) {
+                alert('No processed orders available to export.');
+                return;
+            }
+
+            const headers = ['Name', 'Email', 'Phone', 'Address', 'Status', 'Total', 'Payment Method', 'Confirmation', 'Tracking', 'Created At', 'Items'];
+            const rows = orders.map(order => {
+                const items = order.items.map(item => `${item.quantity}x ${item.name} @ $${item.price.toFixed(2)}`).join(' | ');
+                const status = order.status || (order.shipped ? 'Shipped' : 'Processing');
+                return [
+                    order.name,
+                    order.email,
+                    order.phone || '',
+                    order.address || '',
+                    status,
+                    `$${order.total.toFixed(2)}`,
+                    order.paymentMethod || 'Unknown',
+                    order.confirmation,
+                    order.tracking,
+                    new Date(order.paidAt || order.createdAt).toLocaleString(),
+                    items
+                ];
+            });
+
+            const csvContent = [headers.join(','), ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))].join('\r\n');
+            downloadCsv('ian-yuhi-orders.csv', csvContent);
+        }
+
+        function exportOrdersToJson() {
+            const orders = getProcessedOrders();
+            if (!orders.length) {
+                alert('No processed orders available to export.');
+                return;
+            }
+            const blob = new Blob([JSON.stringify(orders, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'ian-yuhi-orders.json');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function markOrderShipped(index) {
+            const orders = getProcessedOrders();
+            const order = orders[index];
+            if (!order || order.shipped) return;
+                if (!order.paymentConfirmed) {
+                    alert('Payment must be confirmed before this order can be shipped.');
+                    return;
+                }
+            order.shipped = true;
+            order.status = 'Shipped';
+            order.shippedAt = new Date().toISOString();
+            localStorage.setItem('ian-yuhi-orders', JSON.stringify(orders));
+            populatePaymentMethodFilter(document.getElementById('paymentMethodFilter')?.value || 'all');
+            updatePaymentSummary();
+            renderOrderHistory(
+                document.getElementById('orderSearchInput')?.value || '',
+                document.getElementById('orderSortSelect')?.value || 'newest',
+                document.getElementById('orderStatusFilter')?.value || 'all',
+                document.getElementById('paymentMethodFilter')?.value || 'all'
+            );
+        }
+
+        function refundOrder(index) {
+            const orders = getProcessedOrders();
+            const order = orders[index];
+            if (!order || !order.paymentConfirmed) {
+                alert('Only confirmed payments can be refunded.');
+                return;
+            }
+            if (order.refunded) {
+                alert('Order already refunded.');
+                return;
+            }
+
+            const reason = prompt('Enter refund reason (optional):', '')?.trim();
+            const confirmed = confirm(`Refund order ${order.confirmation} for ${order.name}?`);
+            if (!confirmed) return;
+
+            order.refunded = true;
+            order.refundAt = new Date().toISOString();
+            order.refundReason = reason || 'No reason specified';
+            order.status = 'Refunded';
+            localStorage.setItem('ian-yuhi-orders', JSON.stringify(orders));
+            populatePaymentMethodFilter(document.getElementById('paymentMethodFilter')?.value || 'all');
+            updatePaymentSummary();
+            renderOrderHistory(
+                document.getElementById('orderSearchInput')?.value || '',
+                document.getElementById('orderSortSelect')?.value || 'newest',
+                document.getElementById('orderStatusFilter')?.value || 'all',
+                document.getElementById('paymentMethodFilter')?.value || 'all'
+            );
+        }
+
+        async function confirmPayment(orderId) {
+            const orders = getProcessedOrders();
+            const order = orders.find(o => String(o.id) === String(orderId));
+            if (!order || order.paymentConfirmed) return;
+
+            const confirmed = confirm(`Confirm payment for order ${order.confirmation} from ${order.name}?`);
+            if (!confirmed) return;
+
+            order.paymentConfirmed = true;
+            order.paidAt = new Date().toISOString();
+            order.paymentStatus = 'Confirmed';
+            order.status = 'Confirmed';
+            localStorage.setItem('ian-yuhi-orders', JSON.stringify(orders));
+            populatePaymentMethodFilter(document.getElementById('paymentMethodFilter')?.value || 'all');
+            updatePaymentSummary();
+            renderPendingPaymentApprovals();
+            renderOrderHistory(
+                document.getElementById('orderSearchInput')?.value || '',
+                document.getElementById('orderSortSelect')?.value || 'newest',
+                document.getElementById('orderStatusFilter')?.value || 'all',
+                document.getElementById('paymentMethodFilter')?.value || 'all'
+            );
+
+            const synced = await syncOrderToBackend(order);
+            if (synced) showToast('Payment confirmed and synced to backend.');
+            else showToast('Payment confirmed locally (backend sync unavailable).');
+        }
+
+        async function deleteOrder(index) {
+            const orders = getProcessedOrders();
+            const order = orders[index];
+            if (!order) return;
+
+            const confirmed = confirm(`Delete order ${order.confirmation} for ${order.name}? This cannot be undone.`);
+            if (!confirmed) return;
+
+            // Try delete on backend first
+            try {
+                const resp = await fetch(`http://localhost:3000/api/admin/orders/${encodeURIComponent(String(order.id))}`, { method: 'DELETE' });
+                if (resp.ok) {
+                    orders.splice(index, 1);
+                    localStorage.setItem('ian-yuhi-orders', JSON.stringify(orders));
+                    populatePaymentMethodFilter(document.getElementById('paymentMethodFilter')?.value || 'all');
+                    updatePaymentSummary();
+                    renderPendingPaymentApprovals();
+                    renderOrderHistory(
+                        document.getElementById('orderSearchInput')?.value || '',
+                        document.getElementById('orderSortSelect')?.value || 'newest',
+                        document.getElementById('orderStatusFilter')?.value || 'all',
+                        document.getElementById('paymentMethodFilter')?.value || 'all'
+                    );
+                    showToast('Order deleted (server).');
+                    return;
+                }
+            } catch (e) {
+                // network/backend error - fall through to local delete prompt
+            }
+
+            // Backend unavailable — confirm local deletion
+            const localConfirm = confirm('Backend unavailable. Delete order locally instead?');
+            if (!localConfirm) return;
+            orders.splice(index, 1);
+            localStorage.setItem('ian-yuhi-orders', JSON.stringify(orders));
+            populatePaymentMethodFilter(document.getElementById('paymentMethodFilter')?.value || 'all');
+            updatePaymentSummary();
+            renderPendingPaymentApprovals();
+            renderOrderHistory(
+                document.getElementById('orderSearchInput')?.value || '',
+                document.getElementById('orderSortSelect')?.value || 'newest',
+                document.getElementById('orderStatusFilter')?.value || 'all',
+                document.getElementById('paymentMethodFilter')?.value || 'all'
+            );
+            showToast('Order deleted locally.');
+        }
+
+        async function deleteOrderById(orderId) {
+            const orders = getProcessedOrders();
+            const idx = orders.findIndex(o => String(o.id) === String(orderId));
+            if (idx === -1) return;
+            const confirmed = confirm(`Delete order ${orders[idx].confirmation} for ${orders[idx].name}? This cannot be undone.`);
+            if (!confirmed) return;
+
+            try {
+                const resp = await fetch(`http://localhost:3000/api/admin/orders/${encodeURIComponent(String(orderId))}`, { method: 'DELETE' });
+                if (resp.ok) {
+                    orders.splice(idx, 1);
+                    localStorage.setItem('ian-yuhi-orders', JSON.stringify(orders));
+                    populatePaymentMethodFilter(document.getElementById('paymentMethodFilter')?.value || 'all');
+                    updatePaymentSummary();
+                    renderPendingPaymentApprovals();
+                    renderOrderHistory(
+                        document.getElementById('orderSearchInput')?.value || '',
+                        document.getElementById('orderSortSelect')?.value || 'newest',
+                        document.getElementById('orderStatusFilter')?.value || 'all',
+                        document.getElementById('paymentMethodFilter')?.value || 'all'
+                    );
+                    showToast('Order deleted (server).');
+                    return;
+                }
+            } catch (e) {
+                // backend error — prompt for local deletion
+            }
+
+            const localConfirm = confirm('Backend unavailable. Delete order locally instead?');
+            if (!localConfirm) return;
+            orders.splice(idx, 1);
+            localStorage.setItem('ian-yuhi-orders', JSON.stringify(orders));
+            populatePaymentMethodFilter(document.getElementById('paymentMethodFilter')?.value || 'all');
+            updatePaymentSummary();
+            renderPendingPaymentApprovals();
+            renderOrderHistory(
+                document.getElementById('orderSearchInput')?.value || '',
+                document.getElementById('orderSortSelect')?.value || 'newest',
+                document.getElementById('orderStatusFilter')?.value || 'all',
+                document.getElementById('paymentMethodFilter')?.value || 'all'
+            );
+            showToast('Order deleted locally.');
+        }
+
+        function printOrderDetails() {
+            window.print();
+        }
+
+        function showOrderDetails(index) {
+            const orders = getProcessedOrders();
+            const order = orders[index];
+            const modal = document.getElementById('orderDetailModal');
+            const detailContent = document.getElementById('orderDetailContent');
+            if (!modal || !detailContent || !order) return;
+
+            detailContent.innerHTML = `
+                <p><strong>Name:</strong> ${escapeHtml(order.name)}</p>
+                <p><strong>Email:</strong> ${escapeHtml(order.email)}</p>
+                <p><strong>Phone:</strong> ${escapeHtml(order.phone || 'N/A')}</p>
+                <p><strong>Address:</strong> ${escapeHtml(order.address || 'N/A')}</p>
+                <p><strong>Confirmation:</strong> ${escapeHtml(order.confirmation)}</p>
+                <p><strong>Tracking:</strong> ${escapeHtml(order.tracking)}</p>
+                <p><strong>Payment method:</strong> ${escapeHtml(order.paymentMethod)}</p>
+                <p><strong>Payment status:</strong> ${order.paymentConfirmed ? 'Confirmed' : 'Pending admin confirmation'}</p>
+                <p><strong>Transaction ID:</strong> ${escapeHtml(order.transactionId || 'N/A')}</p>
+                <p><strong>Refund status:</strong> ${order.refunded ? 'Refunded' : 'Not refunded'}</p>
+                <p><strong>Refund reason:</strong> ${escapeHtml(order.refundReason || 'N/A')}</p>
+                ${order.failureReason ? `<p><strong>Failure reason:</strong> ${escapeHtml(order.failureReason)}</p>` : ''}
+                <p><strong>Total:</strong> $${order.total.toFixed(2)}</p>
+                <p><strong>Created:</strong> ${escapeHtml(new Date(order.createdAt).toLocaleString())}</p>
+                <h3>Items</h3>
+                ${order.items.map(item => `
+                    <div style="margin-bottom: 12px; padding: 12px; background: rgba(255,255,255,0.04); border-radius: 12px;">
+                        <strong>${escapeHtml(item.name)}</strong>
+                        <div>Price: $${item.price.toFixed(2)}</div>
+                        <div>Tax: $${(item.tax || 0).toFixed(2)}</div>
+                        <div>Shipping: $${(item.shipping || 0).toFixed(2)}</div>
+                    </div>
+                `).join('')}
+            `;
+
+            modal.classList.remove('hidden');
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const orderSearchInput = document.getElementById('orderSearchInput');
+            const orderSortSelect = document.getElementById('orderSortSelect');
+            const paymentMethodFilter = document.getElementById('paymentMethodFilter');
+            const orderStatusFilter = document.getElementById('orderStatusFilter');
+            const exportCsvBtn = document.getElementById('exportCsvBtn');
+            const exportJsonBtn = document.getElementById('exportJsonBtn');
+            const closeModalButton = document.getElementById('closeOrderModal');
+            const printOrderBtn = document.getElementById('printOrderBtn');
+            const modal = document.getElementById('orderDetailModal');
+
+            const getCurrentFilter = () => orderSearchInput?.value || '';
+            const getCurrentSort = () => orderSortSelect?.value || 'newest';
+            const getCurrentPaymentMethod = () => paymentMethodFilter?.value || 'all';
+            const getCurrentStatus = () => orderStatusFilter?.value || 'all';
+
+            await syncOrdersFromBackend();
+            const initialStatus = getQueryParam('status') || getCurrentStatus();
+            if (orderStatusFilter) orderStatusFilter.value = ['pending', 'confirmed', 'shipped', 'refunded'].includes(initialStatus) ? initialStatus : 'all';
+            populatePaymentMethodFilter(getCurrentPaymentMethod());
+            updatePaymentSummary();
+            renderPendingPaymentApprovals();
+            renderOrderHistory(getCurrentFilter(), getCurrentSort(), getCurrentStatus(), getCurrentPaymentMethod());
+
+            if (orderSearchInput) {
+                orderSearchInput.addEventListener('input', () => {
+                    renderOrderHistory(getCurrentFilter(), getCurrentSort(), getCurrentStatus(), getCurrentPaymentMethod());
+                });
+            }
+            if (orderSortSelect) {
+                orderSortSelect.addEventListener('change', () => {
+                    renderOrderHistory(getCurrentFilter(), getCurrentSort(), getCurrentStatus(), getCurrentPaymentMethod());
+                });
+            }
+            if (paymentMethodFilter) {
+                paymentMethodFilter.addEventListener('change', () => {
+                    renderOrderHistory(getCurrentFilter(), getCurrentSort(), getCurrentStatus(), getCurrentPaymentMethod());
+                });
+            }
+            if (orderStatusFilter) {
+                orderStatusFilter.addEventListener('change', () => {
+                    renderOrderHistory(getCurrentFilter(), getCurrentSort(), getCurrentStatus(), getCurrentPaymentMethod());
+                });
+            }
+            if (exportCsvBtn) {
+                exportCsvBtn.addEventListener('click', exportOrdersToCsv);
+            }
+            if (exportJsonBtn) {
+                exportJsonBtn.addEventListener('click', exportOrdersToJson);
+            }
+            if (printOrderBtn) {
+                printOrderBtn.addEventListener('click', printOrderDetails);
+            }
+            if (closeModalButton) {
+                closeModalButton.addEventListener('click', () => {
+                    modal?.classList.add('hidden');
+                });
+            }
+            if (modal) {
+                modal.addEventListener('click', event => {
+                    if (event.target === modal) modal.classList.add('hidden');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

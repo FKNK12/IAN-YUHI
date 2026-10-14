@@ -1,0 +1,70 @@
+<DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shop All | IAN YUHI</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container">
+        <div class="nav-logo">
+          <a href="index.html"><i class="fas fa-clock"></i> IAN YUHI</a>
+        </div>
+        <ul class="nav-links" id="navLinks">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="shop.html">Shop All</a></li>
+        </ul>
+        <div class="hamburger" onclick="toggleMenu()">
+          <i class="fas fa-bars"></i>
+        </div>
+      </div>
+    </nav>
+
+    <div class="page-back-link">
+      <a href="javascript:history.back()"><i class="fas fa-arrow-left"></i> Back</a>
+    </div>
+
+    <main class="page-shell">
+      <section class="shop-page">
+        <div class="container">
+          <h2 class="shop-now-title">Shop Now</h2>
+          <div class="shop-collection-tabs">
+            <a href="shop.html" class="shop-collection-tab active">Suits</a>
+            <a href="shoe.html" class="shop-collection-tab">Shoes</a>
+            <a href="watch.html" class="shop-collection-tab">Watches</a>
+          </div>
+          <div class="filter-bar">
+            <input type="text" id="searchInput" placeholder="Search suits..." class="search-input" />
+            <select id="brandFilter" class="filter-select">
+              <option value="all">All Collections</option>
+              <option value="milan">Milan</option>
+              <option value="aster">Aster</option>
+              <option value="vesper">Vesper</option>
+              <option value="noir">Noir</option>
+              <option value="crown">Crown</option>
+              <option value="verona">Verona</option>
+              <option value="dorian">Dorian</option>
+              <option value="luxe">Luxe</option>
+            </select>
+          </div>
+          <div class="shop-subtitle-wrap">
+            <div class="shop-subtitle" id="shopCollectionTitle">Suits</div>
+          </div>
+          <div class="product-grid" id="productGrid"></div>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

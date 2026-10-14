@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Administrator | IAN YUHI</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="container">
+        <div class="nav-logo">
+          <a href="index.html"><i class="fas fa-clock"></i> IAN YUHI</a>
+        </div>
+        <ul class="nav-links" id="navLinks">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="shop.html">Shop All</a></li>
+          <li><a href="checkout.html">Checkout</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="page-back-link">
+      <a href="javascript:history.back()"><i class="fas fa-arrow-left"></i> Back</a>
+    </div>
+
+    <main class="page-shell admin-page">
+      <div class="container">
+        <div class="admin-card" id="adminCard">
+          <div class="admin-header">
+            <div>
+              <p class="eyebrow">Administrator Panel</p>
+              <h1>Manage Access & Permissions</h1>
+              <p>Use this page to give users access to the shop, checkout, product details, and admin actions.</p>
+            </div>
+            <div class="admin-header-actions">
+              <span id="adminWelcome">Administrator login is required to manage users.</span>
+              <button id="adminLogoutBtn" class="btn-secondary hidden" type="button">Logout</button>
+            </div>
+          </div>
+
+          <section class="admin-section" id="adminLoginSection">
+            <h2>Admin Login</h2>
+            <p class="details">Login using your admin email and the secret PIN.</p>
+            <form id="adminLoginForm" class="admin-form">
+              <label>
+                Admin email
+                <input type="email" id="adminLoginEmail" placeholder="admin@example.com" required />
+              </label>
+              <label>
+                Admin PIN
+                <input type="password" id="adminLoginPin" placeholder="Enter admin PIN" required />
+              </label>
+              <button type="submit" class="btn-secondary">Login as Admin</button>
+              <p id="adminLoginMessage" class="details"></p>
+            </form>
+            <div class="admin-link-row">
+              <p>Need to create a new admin account?</p>
+              <button class="btn-primary" onclick="window.location.href='admin-create.html'">Create Admin Account</button>
+            </div>
+          </section>
+
+          <section class="admin-section" id="adminControlsSection">
+            <h2>Manage User Access</h2>
+            <p class="details">Use the form below to add or update a user's permissions. Click edit on a listed user to load their access settings.</p>
+            <form id="adminForm" class="admin-form">
+              <label>
+                Name
+                <input type="text" id="adminName" placeholder="User name" required />
+              </label>
+              <label>
+                Email
+                <input type="email" id="adminEmail" placeholder="user@example.com" required />
+              </label>
+              <input type="hidden" id="adminOriginalEmail" />
+              <div class="permission-grid">
+                <label><input type="checkbox" id="permShop" checked /> Shop Access</label>
+                <label><input type="checkbox" id="permCheckout" checked /> Checkout Access</label>
+                <label><input type="checkbox" id="permView" checked /> Product View</label>
+                <label><input type="checkbox" id="permAdmin" /> Admin Access</label>
+              </div>
+              <div class="admin-form-actions">
+                <button type="submit" class="btn-primary">Add or Update User</button>
+                <button type="button" id="adminFormCancelBtn" class="btn-secondary">Cancel</button>
+              </div>
+            </form>
+          </section>
+
+          <section class="admin-section">
+            <h2>Current Access List</h2>
+            <p class="details">Edit any user to change or remove permissions.</p>
+            <div id="adminUserList" class="permissions-table"></div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

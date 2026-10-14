@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pending Payments | IAN YUHI</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="container">
+      <div class="nav-logo">
+        <a href="index.html"><i class="fas fa-clock"></i> IAN YUHI</a>
+      </div>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop All</a></li>
+        <li><a href="checkout.html">Checkout</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="page-back-link">
+    <a href="admin-dashboard.html"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+  </div>
+
+  <main class="page-shell admin-page">
+    <div class="container">
+      <div class="admin-card">
+        <div class="admin-header">
+          <div>
+            <p class="eyebrow">Pending Payments</p>
+            <h1>Orders Waiting for Payment</h1>
+            <p>These are orders that have not completed payment yet and should stay separate from the approval queue.</p>
+          </div>
+        </div>
+
+        <section class="admin-section">
+          <div id="pendingOrderList" class="approval-table"></div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function getProcessedOrders() {
+      try {
+        return JSON.parse(localStorage.getItem('ian-yuhi-orders') || '[]');
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function getPendingOrders() {
+      return getProcessedOrders().filter(order => {
+        const isPendingForProcessor = order.paymentConfirmed !== true;
+        const isNotFinalized = order.status !== 'Denied' && order.status !== 'Approved' && order.status !== 'Waiting Review' && order.status !== 'Confirmed';
+        return isPendingForProcessor && isNotFinalized;
+      });
+    }
+
+    function markPaymentReceived(orderId) {
+      const orders = getProcessedOrders();
+      const order = orders.find(item => String(item.id) === String(orderId));
+      if (!order) return;
+
+      const confirmed = window.confirm(`Mark payment as received for ${order.name}? This moves the order into the payment processor.`);
+      if (!confirmed) return;
+
+      order.paymentConfirmed = true;
+      order.paymentStatus = 'Payment Received';
+      order.status = 'Waiting Review';
+      order.paidAt = new Date().toISOString();
+
+      localStorage.setItem('ian-yuhi-orders', JSON.stringify(orders));
+      window.location.href = 'admin-payment-processor.html';
+    }
+
+    function renderPendingOrders() {
+      const list = document.getElementById('pendingOrderList');
+      if (!list) return;
+
+      const orders = getPendingOrders();
+      if (!orders.length) {
+        list.innerHTML = '<p class="empty-cart">No pending payment orders at the moment.</p>';
+        return;
+      }
+
+      list.innerHTML = orders.map(order => {
+        const itemSummary = (order.items || []).map(item => `${item.name} (${item.quantity})`).join(', ') || 'No item details';
+        return `
+          <div class="approval-row">
+            <span>${escapeHtml(order.name)}</span>
+            <span>${escapeHtml(order.email)}</span>
+            <span>${escapeHtml(order.phone || 'N/A')}</span>
+            <span>$${Number(order.total).toFixed(2)}</span>
+            <span>${escapeHtml(itemSummary)}</span>
+            <span>${escapeHtml(order.paymentMethod || 'Unknown')}</span>
+            <span>${escapeHtml(new Date(order.createdAt).toLocaleString())}</span>
+            <span>
+              <span class="status-pill waiting-review">Pending Payment</span>
+            </span>
+            <span>
+              <button class="btn-primary btn-small" type="button" onclick="markPaymentReceived('${escapeHtml(order.id)}')">Payment Went Through</button>
+            </span>
+          </div>
+        `;
+      }).join('');
+
+      list.innerHTML = `
+        <div class="approval-row approval-header">
+          <span>Name</span>
+          <span>Email</span>
+          <span>Phone</span>
+          <span>Total</span>
+          <span>Items</span>
+          <span>Method</span>
+          <span>Date</span>
+          <span>Status</span>
+          <span>Action</span>
+        </div>
+        ${list.innerHTML}
+      `;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderPendingOrders();
+    });
+  </script>
+</body>
+</html>
